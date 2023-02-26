@@ -76,15 +76,12 @@
           'ArrowRight': 'right'
         }
 
-        console.log('key:', key)
         if (hasProperty.call(this.inputs, keyNameToInputName[key])) {
-          console.log('setting:', key)
           this.inputs[keyNameToInputName[key]] = state;
         }
       }
       #draw()
       {
-        console.log(this.padPosition)
         this.pad.style.left = `${this.padPosition}px`;
       }
 
@@ -119,11 +116,8 @@
           const delta = time - lastTime;
           elapsed += delta;
 
-          // console.log('fps:', 1000 / delta) // TODO: display fps
-          // console.log('elapsed:', elapsed) // TODO: display fps
-
           if (elapsed >= 1000) {
-            console.log('steps:', steps) // TODO: display fps
+            // TODO: display fps
             const surplus = elapsed - 1000; // TODO: handle leftover time
             if (surplus > 0) console.warn('unhandled leftover time');
             elapsed = 0; // TODO: handle leftover time
