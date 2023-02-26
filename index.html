@@ -11,6 +11,14 @@
 
 <body>
   <script>
+
+    function createElement()
+    {
+      const el = document.createElement('div')
+      el.style.position = 'fixed'
+      return el;
+    }
+
     class Game
     {
       static MAX_DT = 100;
@@ -26,14 +34,13 @@
         this.padPosition = null;
         this.wrapper = null;
         this.pad = null;
-
-        function createElement()
-        {
-          const el = document.createElement('div')
-          el.style.position = 'fixed'
-          return el;
-        }
-
+        this.ball = {
+          x: null,
+          y: null,
+          velocity: { x: null, y: null },
+          el: createElement(),
+        };
+        //
         const wrapper = createElement();
         wrapper.style.background = 'black';
         const style = wrapper.style;
@@ -52,12 +59,28 @@
         padStyle.background = 'white';
         this.pad = pad;
 
+        const ballStyle = this.ball.el.style;
+        ballStyle.background = 'crimson';
+        ballStyle.width = '10px';
+        ballStyle.height = '10px';
+        ballStyle.borderRadius = '5px';
+
+
         this.#attachEventListeners();
       }
       #movePad(dx)
       {
         dx = dx * Game.PAD_SENSITIVITY;
         this.padPosition += dx;
+      }
+
+      #updateBall(dt)
+      {
+        const $ball = this.ball;
+        const vx = $ball.velocity.x;
+        const vy = $ball.velocity.y;
+        $ball.x += vx * dt;
+        $ball.y += vy * dt;
       }
 
       #attachEventListeners()
@@ -83,6 +106,13 @@
       #draw()
       {
         this.pad.style.left = `${this.padPosition}px`;
+        this.ball.el.style.left = `${this.ball.x}px`;
+        this.ball.el.style.top = `${this.ball.y}px`;
+      }
+
+      #update(dt)
+      {
+        this.#updateBall(dt);
       }
 
       #step(dt)
@@ -91,7 +121,7 @@
 
         // handle inputs
         this.#handleInput(dt);
-
+        this.#update(dt);
         // render
         this.#draw(dt);
       }
@@ -133,10 +163,14 @@
 
         document.body.append(this.wrapper);
         this.wrapper.appendChild(this.pad);
+        this.wrapper.appendChild(this.ball.el);
 
         // initialize STATE
-        const center = this.wrapper.offsetWidth / 2;
-        this.padPosition = center;
+        const centerX = this.wrapper.offsetWidth / 2;
+        const centerY = this.wrapper.offsetHeight / 2;
+        this.padPosition = centerX;
+        this.ball.x = centerX;
+        this.ball.y = centerY
         this.#draw();
       }
 
