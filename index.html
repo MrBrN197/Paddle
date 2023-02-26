@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Point</title>
+</head>
+
+<body>
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+    }
+  </style>
+  <script>
+    class Game
+    {
+      static MAX_DT = 100;
+      static PAD_SENSITIVITY = 0.5;
+
+      constructor()
+      {
+        // STATE
+        this.inputs = {
+          left: null,
+          right: null,
+        }
+        this.padPosition = null;
+        this.wrapper = null;
+        this.pad = null;
+
+        function createElement()
+        {
+          const el = document.createElement('div')
+          el.style.position = 'fixed'
+          return el;
+        }
+
+        const wrapper = createElement();
+        wrapper.style.background = 'black';
+        const style = wrapper.style;
+        style.width = '100vw';
+        style.height = '100vh';
+        this.wrapper = wrapper;
+
+        // const canvas = document.createElement('canvas');
+        const pad = createElement();
+        const padStyle = pad.style;
+        padStyle.background = 'white';
+        padStyle.width = '60px';
+        padStyle.height = '10px';
+        padStyle.bottom = '0px';
+        padStyle.left = '50vw';
+        padStyle.background = 'white';
+        this.pad = pad;
+
+        this.#attachEventListeners();
+      }
+      #movePad(dx)
+      {
+        dx = dx * Game.PAD_SENSITIVITY;
+        this.padPosition += dx;
+      }
+
+      #attachEventListeners()
+      {
+        document.addEventListener('keydown', (e) => this.#setInputs(e.key, true))
+        document.addEventListener('keyup', (e) => this.#setInputs(e.key, false));
+        // TODO: detach
+      }
+      #setInputs(key, state)
+      {
+        if (typeof state !== 'boolean') throw new Error('#setInputs state value should be Boolean');
+        const hasProperty = Object.prototype.hasOwnProperty;
+
+        const keyNameToInputName = {
+          'ArrowLeft': 'left',
+          'ArrowRight': 'right'
+        }
+
+        console.log('key:', key)
+        if (hasProperty.call(this.inputs, keyNameToInputName[key])) {
+          console.log('setting:', key)
+          this.inputs[keyNameToInputName[key]] = state;
+        }
+      }
+      #draw()
+      {
+        console.log(this.padPosition)
+        this.pad.style.left = `${this.padPosition}px`;
+      }
+
+      #step(dt)
+      {
+        if (dt > Game.MAX_DT) console.warn('update took longer than expected') // TODO: 
+
+        // handle inputs
+        this.#handleInput(dt);
+
+        // render
+        this.#draw(dt);
+      }
+      #handleInput(dt)
+      {
+        if (this.inputs.left && this.inputs.right) return; // TODO: cancel each other
+
+        if (this.inputs.left) {
+          this.#movePad(-1 * dt);
+        } else if (this.inputs.right) {
+          this.#movePad(1 * dt);
+        }
+      }
+
+      start()
+      {
+        let lastTime = null;
+        let elapsed = 0;
+        let steps = 0;
+        const update = (time) =>
+        {
+          const delta = time - lastTime;
+          elapsed += delta;
+
+          // console.log('fps:', 1000 / delta) // TODO: display fps
+          // console.log('elapsed:', elapsed) // TODO: display fps
+
+          if (elapsed >= 1000) {
+            console.log('steps:', steps) // TODO: display fps
+            const surplus = elapsed - 1000; // TODO: handle leftover time
+            if (surplus > 0) console.warn('unhandled leftover time');
+            elapsed = 0; // TODO: handle leftover time
+          }
+
+          this.#step(delta);
+          lastTime = time;
+          requestAnimationFrame(update)
+          steps++;
+        }
+        update(lastTime);
+
+
+        document.body.append(this.wrapper);
+        this.wrapper.appendChild(this.pad);
+
+        // initialize STATE
+        const center = this.wrapper.offsetWidth / 2;
+        this.padPosition = center;
+        this.#draw();
+      }
+
+      // end
+    };
+
+    const game = new Game();
+    game.start();
+
+  </script>
+</body>
+
+</html>
